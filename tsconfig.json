@@ -3,10 +3,12 @@
 	"include": [".astro/types.d.ts", "**/*"],
 	"exclude": ["dist"],
 	"compilerOptions": {
-		"baseUrl": ".",
-		"strictNullChecks": true,
-		"paths": {
-			"@/*": ["src/*"]
-		}
-	}
+    "jsx": "react-jsx",
+    "jsxImportSource": "@builder.io/qwik",
+    "baseUrl": ".",
+    "strictNullChecks": true,
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
 }

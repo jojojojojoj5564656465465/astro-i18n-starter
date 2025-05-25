@@ -9,7 +9,7 @@ import heroImageEn from "@/assets/en/hero.svg";
 import heroImageJa from "@/assets/ja/hero.svg";
 import heroImageZhCn from "@/assets/zh-cn/hero.svg";
 import { Image } from "astro:assets";
-
+import Help from "src/components/Help.tsx";
 const locale = Astro.currentLocale as Lang;
 
 export const getStaticPaths = () =>
@@ -185,6 +185,7 @@ export const getStaticPaths = () =>
       }
     </a>
   </p>
+  <Help />
 </Layout>
 
 <style>
