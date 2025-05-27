@@ -1,9 +1,5 @@
 {
   "locale": "zh_CN",
   "name": "zh (CN)",
-  "translations": {
-    "WelcomeRace": "",
-    "hello $1": "",
-    "counter": ""
-  }
+  "translations": {}
 }

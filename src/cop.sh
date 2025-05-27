@@ -2,20 +2,20 @@
 
 # Script: Enhanced File Copier & Concatenator
 # Auteur: [Nom Original/Utilisateur] (révisé et amélioré par une IA)
-# Date de révision: 2024-03-14
-# Version: 2.9 (Utilisation de 'command gum pager')
+# Date de révision: 2024-03-15
+# Version: 3.2 (Options de format réduites, correction show_header)
 # Description:
 # Ce script Bash interactif permet à l'utilisateur de sélectionner plusieurs fichiers
 # via une interface utilisateur basée sur 'gum'. Le contenu concaténé des fichiers
 # sélectionnés est ensuite copié dans le presse-papiers du système.
-# L'utilisateur peut choisir parmi différents formats de sortie pour le contenu copié.
+# L'utilisateur peut choisir entre un format Simple ou Markdown pour le contenu copié.
 # Fonctionnalités clés :
 #   - Interface utilisateur élégante avec 'gum'.
 #   - Sélection de fichiers via les arguments de la ligne de commande ou un navigateur de fichiers.
 #   - Détection et prévention des doublons de fichiers.
-#   - Choix du format de sortie (Simple, Markdown, Numéroté, Compact).
+#   - Choix du format de sortie (Simple, Markdown).
 #   - Copie multi-plateforme dans le presse-papiers (Linux, macOS, WSL).
-#   - Aperçu optionnel du contenu copié avec 'gum pager' (ou 'head' en fallback).
+#   - Aperçu optionnel du contenu copié avec 'gum pager < FICHIER_TEMP'.
 #   - Affichage de statistiques sur le contenu copié.
 # Dépendances:
 #   - gum (https://github.com/charmbracelet/gum)
@@ -30,7 +30,6 @@ RED="#FFB6C1"
 PURPLE="#DDA0DD"
 
 # Vérifier si gum est installé
-# MODIFICATION: Utilisation de 'command' aussi pour la vérification initiale, par cohérence.
 if ! command -v gum >/dev/null 2>&1; then
     echo "❌ Erreur: Gum n'est pas installé." >&2 
     echo "Installez-le avec: brew install gum (ou voir https://github.com/charmbracelet/gum )" >&2
@@ -53,9 +52,9 @@ fi
 
 # Fonction pour afficher le titre
 show_header() {
+    # CORRECTION: Le titre doit être sur stderr pour ne pas interférer avec la sortie de select_files
     command gum style --foreground "$PURPLE" --border double --align center --width 60 --margin "1 2" --padding "1 2" \
-        "📁 COPIEUR DE CONTENU DE FICHIERS" \
-        "Powered by Gum ✨" >&2
+        "📁 Select multiple files from project ✨" >&2
 }
 
 # Fonction pour ajouter un fichier unique à la liste
@@ -100,7 +99,7 @@ select_files() {
 
         if [ ${#initial_files_from_args[@]} -gt 0 ]; then
             command gum style --foreground "$BLUE" "Souhaitez-vous utiliser ces ${#initial_files_from_args[@]} fichier(s) valide(s) trouvés dans les arguments ?" >&2
-            if command gum confirm --default=true "Utiliser ces fichiers ?"; then # 'command gum confirm'
+            if command gum confirm --default=true "Utiliser ces fichiers ?"; then
                 files=("${initial_files_from_args[@]}")
                 printf '%s\n' "${files[@]}" 
                 return
@@ -184,26 +183,19 @@ select_files() {
 }
 
 # Fonction pour choisir le format de sortie
+# MODIFICATION: Options de format réduites
 format_content() {
     local format_choice
 
     format_choice=$(command gum choose --header "Choisissez le format de sortie du contenu:" \
         "Simple (avec séparateurs)" \
-        "Markdown (avec blocs de code)" \
-        "Numéroté (avec numéros de ligne)" \
-        "Compact (sans séparateurs)")
+        "Markdown (avec blocs de code)")
 
     case "$format_choice" in
         "Markdown (avec blocs de code)")
             return 1
             ;;
-        "Numéroté (avec numéros de ligne)")
-            return 2
-            ;;
-        "Compact (sans séparateurs)")
-            return 3
-            ;;
-        "Simple (avec séparateurs)" | *) 
+        "Simple (avec séparateurs)" | *) # Cas par défaut si "Simple" est choisi ou si la sélection est annulée
             return 0
             ;;
     esac
@@ -243,6 +235,7 @@ main() {
             local filename
             filename=$(basename "$file_path")
 
+            # MODIFICATION: Logique de formatage simplifiée
             case $FORMAT_TYPE in
                 1) # Markdown
                     local extension="${filename##*.}" 
@@ -260,18 +253,7 @@ main() {
                     echo "\`\`\`" >> "$TEMP_FILE"
                     echo "" >> "$TEMP_FILE" 
                     ;;
-                2) # Numéroté
-                    echo "=== FICHIER: $file_path ===" >> "$TEMP_FILE"
-                    nl -ba "$file_path" >> "$TEMP_FILE" 
-                    echo "" >> "$TEMP_FILE"
-                    ;;
-                3) # Compact
-                    echo "// Fichier: $file_path" >> "$TEMP_FILE" 
-                    cat "$file_path" >> "$TEMP_FILE"
-                    [[ $(tail -c1 "$file_path" | wc -l) -eq 0 ]] && echo >> "$TEMP_FILE"
-                    echo "" >> "$TEMP_FILE" 
-                    ;;
-                *) # Simple (FORMAT_TYPE 0)
+                0 | *) # Simple (FORMAT_TYPE 0) et cas par défaut
                     echo "=== FICHIER: $file_path ===" >> "$TEMP_FILE"
                     echo "" >> "$TEMP_FILE"
                     cat "$file_path" >> "$TEMP_FILE"
@@ -291,7 +273,6 @@ main() {
         exit 1
     fi
 
-    # Utilisation de 'command gum spin'
     if command gum spin --spinner globe --title "Copie du contenu dans le presse-papiers..." -- bash -c "cat '$TEMP_FILE' | $CLIPBOARD_CMD"; then
         command gum style --foreground "$GREEN" --bold "✅ Succès!" >&2 
         command gum style --foreground "$BLUE" "$FILES_PROCESSED fichier(s) traité(s) et contenu copié dans le presse-papiers." >&2 
@@ -301,20 +282,19 @@ main() {
         read CHAR_COUNT _ < <(wc -c "$TEMP_FILE")
         read WORD_COUNT _ < <(wc -w "$TEMP_FILE")
 
-        if command gum confirm --default=false "Voir le contenu copié avec le pager (gum pager) ?"; then
-            command gum style --foreground "$PURPLE" --border double --padding "1 2" --margin "1 0" "📄 APERÇU DU CONTENU (via gum pager)" >&2 
+        if command gum confirm --default=false "Voir le contenu (qui a été copié) avec un pager ?"; then
+            command gum style --foreground "$PURPLE" --border double --padding "1 2" --margin "1 0" "📄 APERÇU DU CONTENU (via gum pager)" >&2
             
-            # Utilisation de 'command gum pager' pour éviter les alias/fonctions
             if command gum pager < "$TEMP_FILE"; then
-                command gum style --foreground "$GREEN" --bold "💾 Total: $TOTAL_LINES lignes copiées (consultées avec le pager)." >&2
+                command gum style --foreground "$GREEN" --bold "💾 Total: $TOTAL_LINES lignes de contenu (consultées avec le pager)." >&2
             else
-                command gum style --foreground "$YELLOW" "⚠️  Le pager (command gum pager) n'a pas pu s'afficher correctement ou a été fermé prématurément." >&2
+                command gum style --foreground "$YELLOW" "⚠️  Le pager (gum pager < $TEMP_FILE) n'a pas pu s'afficher correctement ou a été fermé prématurément." >&2
                 command gum style --foreground "$YELLOW" "Affichage des 30 premières lignes du contenu à la place :" >&2
                 head -n 30 "$TEMP_FILE" | sed 's/^/  /' | command gum style --margin "0 1" >&2 
                 if [ "$TOTAL_LINES" -gt 30 ]; then
                     command gum style --foreground "$YELLOW" "  ...et $(($TOTAL_LINES - 30)) lignes supplémentaires." >&2
                 fi
-                command gum style --foreground "$GREEN" --bold "💾 Total: $TOTAL_LINES lignes copiées." >&2
+                command gum style --foreground "$GREEN" --bold "💾 Total: $TOTAL_LINES lignes de contenu." >&2
             fi
         fi
 

@@ -1,9 +1,0 @@
-{
-  "locale": "zh-cn",
-  "name": "简体中文",
-  "translations": {
-    "welcome": "欢迎来到Qwik计数器！",
-    "hello $1": "你好，$1",
-    "counter": "当前计数"
-  }
-}

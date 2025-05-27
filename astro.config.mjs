@@ -41,7 +41,7 @@ export default defineConfig({
         removeUnusedKeys: false, // Ne supprime pas les clés non utilisées
         // assetsDir: 'build', // La valeur par défaut est 'build' si qwikVite est détecté
       }),
-      // qwikdev() ajoute déjà les plugins Vite nécessaires pour Qwik via l'intégration
+     
     ],
   },
 });

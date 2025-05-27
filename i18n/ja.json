@@ -1,9 +1,0 @@
-{
-  "locale": "ja",
-  "name": "日本語",
-  "translations": {
-    "welcome": "Qwikカウンターへようこそ！",
-    "hello $1": "こんにちは、$1さん",
-    "counter": "現在のカウント"
-  }
-}
