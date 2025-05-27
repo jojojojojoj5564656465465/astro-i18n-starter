@@ -14,7 +14,7 @@ PURPLE="#DDA0DD"
 # Vérifier si gum est installé
 if ! command -v gum >/dev/null 2>&1; then
     echo "❌ Erreur: Gum n'est pas installé."
-    echo "Installez-le avec: brew install gum (ou voir https://github.com/charmbracelet/gum)"
+    echo "Installez-le avec: brew install gum (ou voir https://github.com/charmbracelet/gum )"
     exit 1
 fi
 

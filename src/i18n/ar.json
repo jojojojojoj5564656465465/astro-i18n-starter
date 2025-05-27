@@ -1,0 +1,11 @@
+{
+  "locale": "ar",
+  "fallback": "en",
+  "name": "العربية",
+  "translations": {
+    "welcome": "مرحباً",
+    "hello $1": "مرحباً $1",
+    "counter": "العداد",
+    "WelcomeRace": ""
+  }
+}

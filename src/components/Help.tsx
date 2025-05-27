@@ -1,6 +1,5 @@
 import { component$, useStylesScoped$ } from "@builder.io/qwik";
-import { LOCALES, useTranslations, type Lang } from "@/i18n";
-const t = useTranslations({} as Lang);
+
 
 export default component$(() => {
   useStylesScoped$(`
@@ -10,9 +9,5 @@ export default component$(() => {
         display: inline-flex;
         background-color: limegreen;
             color: blue;}`);
-  return (
-    <div>
-      'HHIHJJKIII'
-    </div>
-  );
+  return <div>'HHIHJJKIII'</div>;
 });

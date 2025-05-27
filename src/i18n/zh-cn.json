@@ -1,0 +1,10 @@
+{
+  "locale": "zh-cn",
+  "fallback": "en",
+  "name": "简体中文",
+  "translations": {
+    "welcome": "欢迎",
+    "hello $1": "你好 $1",
+    "counter": "计数器"
+  }
+}

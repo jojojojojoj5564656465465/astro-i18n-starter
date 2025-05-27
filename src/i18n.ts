@@ -46,6 +46,7 @@ export function useTranslations(lang: Lang) {
   return function t(multilingual: Multilingual | string): string {
     if (typeof multilingual === "string") {
       return multilingual;
+    // biome-ignore lint/style/noUselessElse: <explanation>
     } else {
       return multilingual[lang] || multilingual[DEFAULT_LOCALE] || "";
     }

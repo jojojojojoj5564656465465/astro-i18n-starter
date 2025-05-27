@@ -1,39 +1,52 @@
 ---
 // Basic Layout for All Pages
-
+import { setupI18nServer, setCurrentLocale } from "@/lib/i18n-setup";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import LocaleHtmlHead from "@/components/i18n/LocaleHtmlHead.astro";
 import LocaleSuggest from "@/components/i18n/LocaleSuggest.astro";
 
 import { SITE_TITLE, SITE_DESCRIPTION, X_ACCOUNT } from "@/consts";
-import { useTranslations, LOCALES, getLocalePaths, type Lang } from "@/i18n";
-const t = useTranslations(Astro.currentLocale as Lang);
-import "@/styles/global.css";
+import { useTranslations, LOCALES, getLocalePaths, type Lang, DEFAULT_LOCALE } from "@/i18n"; // DEFAULT_LOCALE importé
+
+// IMPORT GLOBAL CSS - TRÈS IMPORTANT POUR LE STYLE !!
+import "@/styles/global.css"; // Assurez-vous que ce chemin est correct !
+
+const currentAstroLocale = Astro.currentLocale as Lang;
+const t = useTranslations(currentAstroLocale);
+
+// Configuration de compiled-i18n pour le SSR
+if (import.meta.env.SSR) {
+  setupI18nServer();
+  setCurrentLocale(currentAstroLocale);
+}
 
 interface Props {
   title?: string;
   description?: string;
-  frontmatter?: undefined;
+  frontmatter?: {
+    title?: string;
+    description?: string;
+  };
 }
 
 const {
-  title,
-  description,
+  title: pageTitle,
+  description: pageDescription,
 } = Astro.props.frontmatter || Astro.props;
 
-const locale = Astro.currentLocale as Lang;
-const localeTitle = title ? `${title} - ${t(SITE_TITLE)}` : t(SITE_TITLE);
-const localeDescription = description || t(SITE_DESCRIPTION);
+const localeTitle = pageTitle ? `${pageTitle} - ${t(SITE_TITLE)}` : t(SITE_TITLE);
+const localeDescription = pageDescription || t(SITE_DESCRIPTION);
+// Utilisation de DEFAULT_LOCALE ici au lieu de DEFAULT_LOCALE_SETTING qui vient de locales.ts
+const localeObject = LOCALES[currentAstroLocale] || LOCALES[DEFAULT_LOCALE as Lang];
 ---
-
 <!--
 
   Source Code:
   https://github.com/psephopaiktes/astro-i18n-starter
 
 -->
-<html lang={LOCALES[locale].lang || locale} dir={LOCALES[locale].dir || null}>
+<html lang={localeObject.lang || currentAstroLocale} dir={localeObject.dir || 'ltr'}>
   <head>
     <meta charset="UTF-8" />
     <title>{localeTitle}</title>
@@ -41,57 +54,67 @@ const localeDescription = description || t(SITE_DESCRIPTION);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="generator" content={Astro.generator} />
-    {
-      getLocalePaths(Astro.url).map((props) => (
-        <link
-          rel="alternate"
-          hreflang={LOCALES[props.lang].lang || props.lang}
-          href={Astro.site?.origin + props.path}
-        />
-      ))
-    }
 
-    <!-- icon -->
+    {getLocalePaths(Astro.url).map((props) => (
+      <link
+        rel="alternate"
+        hreflang={LOCALES[props.lang]?.lang || props.lang}
+        href={ (Astro.site?.toString().replace(/\/$/, '') || '') + props.path }
+      />
+    ))}
+
+    {/* ... autres balises meta, icones, OGP ... */}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon alternate" sizes="64x64" type="image/png" href="/favicon.png">
     <link rel="icon" sizes="192x192" href="/android-chrome.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="color-scheme" content="light dark" />
 
-    <!-- OGP -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content={localeTitle} />
-    <meta property="og:site_name" content={localeTitle} />
+    <meta property="og:site_name" content={t(SITE_TITLE)} />
     <meta property="og:description" content={localeDescription} />
-    <meta property="og:image" content={Astro.site + "ogp.png"} />
-    <meta property="og:url" content={Astro.url} />
-    <meta property="og:locale" content={LOCALES[locale].lang || locale} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={new URL("ogp.png", Astro.site).href} />
+    <meta property="og:url" content={Astro.url.toString()} />
+    <meta property="og:locale" content={localeObject.lang || currentAstroLocale} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content={t(X_ACCOUNT)} />
 
-    <!-- External Resource -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <link rel="preload" as="style" fetchpriority="high" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;800&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;800&display=swap" media="print" onload={`this.media='all'`} />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;800&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;800&display=swap"></noscript>
 
-    <link rel="preload" as="style" fetchpriority="high" href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp&display=swap" media="print" onload={`this.media='all'`} />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp&display=swap"></noscript>
 
-    <LocaleHtmlHead />
+    { LocaleHtmlHead && <LocaleHtmlHead /> }
+
+    <!-- Voici comment on définit un slot nommé dans un layout -->
+    <slot name="head-extra" />
   </head>
 
   <body>
-    <LocaleSuggest />
+    { LocaleSuggest && <LocaleSuggest /> }
     <Header />
 
     <main class="l-main l-content">
+      <!-- Ceci est le slot par défaut pour le contenu de la page -->
       <slot />
     </main>
 
     <Footer />
 
-    { import.meta.env.DEV && <style>:root { scroll-behavior: auto }</style> }
+    { import.meta.env.DEV && <style>:root { scroll-behavior: auto; }</style> }
+
+    <script>
+      import { setupI18nClient } from '@/lib/i18n-setup';
+      if (typeof window !== 'undefined') {
+        setupI18nClient();
+      }
+    </script>
   </body>
 </html>

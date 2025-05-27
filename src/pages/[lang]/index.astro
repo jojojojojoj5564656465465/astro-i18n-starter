@@ -4,6 +4,7 @@ import Layout from "@/layouts/Base.astro";
 const t = useTranslations(Astro.currentLocale as Lang);
 import { getRelativeLocaleUrl } from "astro:i18n";
 
+import CounterQwik from "src/components/Counter.tsx";
 import heroImageAr from "@/assets/ar/hero.svg";
 import heroImageEn from "@/assets/en/hero.svg";
 import heroImageJa from "@/assets/ja/hero.svg";
@@ -76,7 +77,7 @@ export const getStaticPaths = () =>
     <li>example.com/en/</li>
     <li>example.com/ja/</li>
   </ul>
-
+  <CounterQwik />
   <h2>
     {
       t({

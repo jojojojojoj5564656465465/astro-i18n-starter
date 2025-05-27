@@ -1,0 +1,11 @@
+{
+  "locale": "en",
+  "fallback": null,
+  "name": "English",
+  "translations": {
+    "welcome": "WelcomeRace",
+    "hello $1": "Hello $1",
+    "counter": "Counter",
+    "WelcomeRace": ""
+  }
+}

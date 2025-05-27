@@ -1,28 +1,34 @@
 {
-	"name": "astro-i18n-starter",
-	"description": "A starter for Astro with i18n support",
-	"version": "3.0.0",
-	"private": false,
-	"license": "MIT",
-	"homepage": "https://astro-i18n-starter.pages.dev/",
-	"engines": {
-		"node": ">=20"
-	},
-	"scripts": {
-		"dev": "astro dev",
-		"start": "astro dev --open",
-		"build": "astro check && astro build",
-		"preview": "astro preview",
-		"astro": "astro"
-	},
-	"dependencies": {
-		"@astrojs/check": "^0.9.4",
-		"@astrojs/mdx": "^4.3.0",
-		"@astrojs/rss": "^4.0.11",
-		"@astrojs/sitemap": "^3.4.0",
-		"@builder.io/qwik": "^1.14.1",
-		"@qwikdev/astro": "^0.8.0",
-		"astro": "^5.8.0",
-		"typescript": "^5.8.3"
-	}
+  "name": "astro-i18n-starter",
+  "description": "A starter for Astro with i18n support",
+  "version": "3.0.0",
+  "private": false,
+  "license": "MIT",
+  "homepage": "https://astro-i18n-starter.pages.dev/",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev --open",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "i18n-extract": "node_modules/.bin/localize-extract -s \"dist/build/*.js\" -f json -o i18n/message.en.json",
+    "i18n-translate": "node_modules/.bin/localize-translate -s \"*.js\" -t i18n/message.*.json -o dist/build/{{LOCALE}} -r ./dist/build"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/mdx": "^4.3.0",
+    "@astrojs/rss": "^4.0.11",
+    "@astrojs/sitemap": "^3.4.0",
+    "@builder.io/qwik": "^1.14.1",
+    "@qwikdev/astro": "^0.8.0",
+    "astro": "^5.8.0",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "compiled-i18n": "^1.1.1",
+    "i18n-extract": "^0.6.7"
+  }
 }
